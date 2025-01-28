@@ -8,6 +8,8 @@ import org.example.kata.demo1.service.ProductService;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,35 +24,18 @@ import java.util.List;
 @RequestMapping("/kata/v1/test")
 public class SimpleController {
     public SimpleController(ProductService productService, WebClient webClient) {
-        this.productService = productService;
         this.webClient = webClient;
     }
-
-    private final ProductService productService;
     private final WebClient webClient;
 
     private List<Product> getAllProduct() throws JsonProcessingException {
         final String uri = "https://jsonmock.hackerrank.com/api/inventory";
         String result = webClient.get().uri(uri).retrieve().bodyToMono(String.class).block();
         JSONObject root = new JSONObject(result);
-
         JSONArray data = root.getJSONArray("data");
         ObjectMapper objectMapper = new ObjectMapper();
         Product[] ProductArray = objectMapper.readValue(data.toString(), Product[].class);
         return Arrays.asList(ProductArray);
-    }
-
-
-    @GetMapping("/getAllProduct")
-    public List<Product> listAllProduct() throws JsonProcessingException {
-        return getAllProduct();
-    }
-
-    @PostMapping()
-    public ProductResponse saveAll() throws JsonProcessingException {
-        List<Product> ProductList = getAllProduct();
-        long productSaved = productService.saveProducts(ProductList);
-        return new ProductResponse(productSaved);
     }
 
 
